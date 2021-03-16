@@ -23,7 +23,7 @@ This example uses docker-compose and Docker containers. For installing Docker En
 
 3. Open a browser and go to ​http://localhost:3000
 
-4. Now copy the private key given in separate file named sample_pk.priv in the sawtooth-cookiejar folder and enter it in the `Private_Key` field and click the `LOGIN` button. You will be directed to the home page of CookieJar.
+4. Now copy the private key given in separate file named `sample_pk.priv` in the sawtooth-cookiejar folder and enter it in the `Private_Key` field and click the `LOGIN` button. You will be directed to the home page of CookieJar.
 
 5. Now you can play around with the CookieJar application. Select the `Bake` option from the menu. Enter the number of cookies to be baked, in the given `Cookies` field. After that click the `BAKE` button. You will get an alert. Click `OK`.
 
