@@ -1,91 +1,133 @@
-function login_cookie(event) {
+
+function login_cookie(event){
     event.preventDefault();
     const Key = document.getElementById('login_id').value;
-    if (Key.length === 0) {
+    if(Key.length === 0){
         alert("please enter the Key");
     }
-    else {
-        $.post('/', { privateKey: Key, privateKey1: this.data_key }, (data, textStatus, jqXHR) => {
-            if (data.done = 1) {
+    else{
+        fetch('/',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',              
+            },
+            body: JSON.stringify({privateKey : Key})
+        })
+        .then(function(response){
+            console.log(response);
+            return response.json();
+        })
+        .then(function (data){
+            console.log(JSON.stringify(data));
+            if(data.done =1){
                 sessionStorage.clear();
-                sessionStorage.setItem("privatekey", data.privatekey);
+                sessionStorage.setItem("privatekey",data.privatekey);
                 alert(data.message);
-                window.location.href = '/home';
+                window.location.href='/home';
             }
-            else {
-                window.location.href = '/';
+            else{
+                window.location.href='/';
             }
-
-        }, 'json');
+        })
+        .catch(function(err){
+            console.log(err);
+            alert("Error in processing request");
+        })
     }
 }
 
-// function uploadFunction(event){
-//     event.preventDefault();
-//     var file = event.target.files[0];
-//     var reader =new FileReader();
-//     reader.onload=function uploadFunction(event){
-//         var Key =event.target.result;
-//         console.log("dataaa="+Key)
-//         $.post('/',{ privateKey : Key  },(data, textStatus, jqXHR)=>{
-//             if(data.done =1){
-//                 sessionStorage.clear();
-//                 sessionStorage.setItem("privatekey",data.privatekey);
-//                 alert(data.message);
-//                 window.location.href='/home';
-//             }
-//             else{
-//                 window.location.href='/';
-//             }
-
-//         },'json');
-//     };
-//     reader.readAsText(file);
-// }
-
-function logout_cookie(event) {
+function logout_cookie(event){
     event.preventDefault();
     sessionStorage.clear();
-    window.location.href = '/';
+    window.location.href='/';
 }
 
-function bake_cookie(event) {
+function bake_cookie(event){
     event.preventDefault();
-    const p_key = sessionStorage.getItem('privatekey');
+    const p_key=sessionStorage.getItem('privatekey');
     const bake_cookie = document.getElementById('bake_id').value;
-    if (bake_cookie.length === 0) {
-        alert("Please enter a number");
+    if(bake_cookie.length === 0){
+    alert("Please enter a number");
 
-    }
-    else {
-        $.post('/bake', { pri_key: p_key, cookie: bake_cookie }, (data, textStatus, jqXHR) => {
+     }
+    else{
+        fetch('/bake',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',              
+            },
+            body: JSON.stringify({pri_key: p_key, cookie: bake_cookie})
+        })
+        .then(function(response){
+            console.log(response);
+            return response.json();
+        })
+        .then(function (data){
+            console.log(JSON.stringify(data));
             alert(data.message);
-        }, 'json');
+        })
+        .catch(function(err){
+            console.log(err);
+            alert("Error in processing request");
+        })
+
     }
 }
 
-function eat_cookie(event) {
+function eat_cookie(event){
     event.preventDefault();
-    const p_key = sessionStorage.getItem('privatekey');
+    const p_key=sessionStorage.getItem('privatekey');
     const eat_cookie = document.getElementById('eat_id').value;
-    console.log("value" + eat_cookie)
-    if (eat_cookie.length === 0) {
-        alert("Please enter the number");
-
+    console.log("value"+eat_cookie)
+    if(eat_cookie.length === 0){
+        alert("Please enter the number");  
     }
-    else {
-        $.post('/eat', { pri_key: p_key, cookie: eat_cookie }, (data, textStatus, jqXHR) => {
+    else{
+        fetch('/eat',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',              
+            },
+            body: JSON.stringify({pri_key : p_key, cookie : eat_cookie})
+        })
+        .then(function(response){
+            console.log(response);
+            return response.json();
+        })
+        .then(function (data){
+            console.log(JSON.stringify(data));
             alert(data.message);
-        }, 'json');
+        })
+        .catch(function(err){
+            console.log(err);
+            alert("Error in processing request");
+        })
     }
 
 }
 
-function count_cookie(event) {
+function count_cookie(event){
     event.preventDefault();
-    const p_key = sessionStorage.getItem('privatekey');
-    $.post('/count', { pri_key: p_key }, (data, textStatus, jqXHR) => {
-        alert("Your cookie count is:" + data.balance);
-        document.getElementById("count_id").value = "Your cookies = " + data.balance;
-    }, 'json');
+    const p_key=sessionStorage.getItem('privatekey');
+    fetch('/count',{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',              
+        },
+        body: JSON.stringify({pri_key : p_key})
+    })
+    .then(function(response){
+        console.log(response);
+        return response.json();
+    })
+    .then(function (data){
+        console.log(JSON.stringify(data));
+        alert("Your cookie count is:"  + data.count);
+        document.getElementById("count_id").value ="Your cookies = " + data.count;
+    })
+    .catch(function(err){
+        console.log(err);
+        alert("Error in processing request");
+    })
+
 }

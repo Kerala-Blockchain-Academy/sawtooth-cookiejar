@@ -12,10 +12,6 @@ services:
      build:
        context: .
        dockerfile: CookiejarClient/DockerFile
-       args:
-         - http_proxy
-         - https_proxy
-         - no_proxy
      volumes:
          - '.:/project/Cookiejar'
 
@@ -24,17 +20,13 @@ services:
     build:
       context: .
       dockerfile: ./CookiejarProcessor/Dockerfile
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
     depends_on:
         - validator
     volumes:
         - '.:/project/Cookiejar'
   sawtooth-rest-api:
     container_name: rest-api
-    image: hyperledger/sawtooth-rest-api:1.1
+    image: hyperledger/sawtooth-rest-api:1.0
     expose:
       - 8008
     ports:
@@ -46,13 +38,13 @@ services:
         --connect tcp://validator:4004
         --bind sawtooth-rest-api:8008
   settings-tp:
-    image: hyperledger/sawtooth-settings-tp:1.1
+    image: hyperledger/sawtooth-settings-tp:1.0
     depends_on:
       - validator
     command: settings-tp -vv --connect tcp://validator:4004
   validator:
     container_name: validator
-    image: hyperledger/sawtooth-validator:1.1
+    image: hyperledger/sawtooth-validator:1.0
     expose:
       - 4004
     ports:
@@ -68,14 +60,5 @@ services:
         sawtooth-validator -vvv \
           --endpoint tcp://validator:8800 \
           --bind component:tcp://eth0:4004 \
-          --bind network:tcp://eth0:8800 \
-          --bind consensus:tcp://eth0:5050"
-
-  devmode-engine:
-    image: hyperledger/sawtooth-devmode-engine-rust:1.1
-    ports:
-      - '5050:5050'
-    container_name: sawtooth-devmode-engine-rust-default
-    depends_on:
-      - validator
-    entrypoint: devmode-engine-rust --connect tcp://validator:5050
+          --bind network:tcp://eth0:8800
+      "

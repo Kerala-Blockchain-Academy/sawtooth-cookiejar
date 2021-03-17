@@ -4,9 +4,9 @@
   "description": "A cookiejar transaction processor/family using sawtooth js sdk",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js tcp://validator:4004"
+    "start": "node Processor.js"
   },
-  "author": "Ashish K Mishra",
+  "author": "",
   "license": "Apache-2.0",
   "dependencies": {
     "protobufjs": "^6.7.3",

@@ -1,48 +1,20 @@
 'use strict'
 
 //require the handler module.
-//declaring a constant variable.
 const { TransactionHandler } = require('sawtooth-sdk/processor/handler')
-const {
-  InvalidTransaction,
-  InternalError
-} = require('sawtooth-sdk/processor/exceptions')
-const crypto = require('crypto')
+const { InvalidTransaction, InternalError } = require('sawtooth-sdk/processor/exceptions')
+const { createHash } = require('crypto');
 const { TextEncoder, TextDecoder } = require('text-encoding/lib/encoding')
 
-const _hash = (x) => crypto.createHash('sha512').update(x).digest('hex').toLowerCase().substring(0, 64)
+function hash(v) {
+  return createHash('sha512').update(v).digest('hex');
+}
+
 var encoder = new TextEncoder('utf8');
 var decoder = new TextDecoder('utf8');
-const MIN_VALUE = 0
+
 const CJ_FAMILY = 'cookiejar';
-const CJ_NAMESPACE = _hash(CJ_FAMILY).substring(0, 6);
-
-//function to obtain the payload obtained from the client
-var _decodeRequest = function _decodeRequest(payload) {
-  payload = payload.toString().split(',');
-  if (payload.length === 2) {
-    var payload_data = {
-      action: payload[0],
-      quantity: payload[1]
-    }
-
-  } else {
-    throw new InvalidTransaction('Invalid payload serialization');
-
-  }
-  if (!payload_data.action) {
-    throw new InvalidTransaction('Action is required');
-  }
-  var quantity = payload_data.quantity;
-  if (quantity === null || quantity === undefined) {
-    throw new InvalidTransaction('Value is required');
-  }
-  quantity = parseInt(quantity);
-  if (typeof quantity !== "number" || quantity <= MIN_VALUE) {
-    throw new InvalidTransaction('Value must be an integer, ' + 'not less than 1');
-  }
-  return payload_data
-}
+const CJ_NAMESPACE = hash(CJ_FAMILY).substring(0, 6);
 
 //function to display the errors
 var _toInternalError = function (err) {
@@ -52,11 +24,10 @@ var _toInternalError = function (err) {
 };
 
 //function to set the entries in the block using the "SetState" function
-const _setEntry = (context, address, stateValue) => {
+const _setEntry = function (context, address, stateValue) {
   let dataBytes = encoder.encode(stateValue)
-  let entries = {
-    [address]: dataBytes
-  }
+  let entries = {};
+  entries[address] = dataBytes;
   return context.setState(entries)
 }
 
@@ -69,17 +40,16 @@ class CookieJarHandler extends TransactionHandler {
 
     try {
       console.log('trasactioProcessRequest=', transactionProcessRequest);
-      const payload = transactionProcessRequest.payload;
-      let update = _decodeRequest(payload);
-      console.log("update= ", update);
+      const payload = decoder.decode(transactionProcessRequest.payload);
+      let payloadData = payload.toString().split(',');
       var header = transactionProcessRequest.header;
       var userPublicKey = header.signerPublicKey;
-      var Address = CJ_NAMESPACE + _hash(userPublicKey).slice(-64);
-      var action = update.action;
-      var quantity = update.quantity;
+      var Address = hash(CJ_FAMILY).substr(0, 6) + hash(userPublicKey).substr(0, 64);
+      var action = payloadData[0];
+      var quantity = payloadData[1];
 
       // Select the action to be performed
-      if (update.action === 'bake') {
+      if (action === 'bake') {
 
         return context.getState([Address]).then(function (stateKeyValueAddress) {
           console.log("State Address value", JSON.stringify(stateKeyValueAddress));
@@ -87,45 +57,42 @@ class CookieJarHandler extends TransactionHandler {
           previous_data = stateKeyValueAddress[Address];
           if (previous_data == '' || previous_data == null) {
             console.log("No previous cookies, creating new cookie jar");
-            var newCount = parseInt(update.quantity);
+            var newCount = parseInt(quantity);
           }
           else {
             var count = 0;
             count = parseInt(decoder.decode(previous_data));
-            var newCount = count + parseInt(update.quantity);
+            var newCount = count + parseInt(quantity);
             console.log("new cookiejar count is :" + newCount);
           }
           var strNewCount = newCount.toString();
           return _setEntry(context, Address, strNewCount);
         });
       }
-      else if (update.action === 'eat') {
+      else if (action === 'eat') {
 
         return context.getState([Address]).then(function (stateKeyValueAddress) {
           console.log("State Address value", JSON.stringify(stateKeyValueAddress));
           var previous_data = 0;
           previous_data = stateKeyValueAddress[Address];
           if (previous_data == '' || previous_data == null) {
-            throw new InvalidTransaction("No previous cookies, Eat finction not possible");
+            throw new InvalidTransaction("No previous cookies, Eat function not possible");
           }
           else {
             var count = 0;
             count = decoder.decode(previous_data);
             count = parseInt(count);
-            if (update.quantity > count) {
+            if (quantity > count) {
               throw new InvalidTransaction("Not enough cookies to eat.The number should be lesser or equal to " + count);
             }
             else {
-              var newCount = count - parseInt(update.quantity);
+              var newCount = count - parseInt(quantity);
             }
-
             console.log("new cookiejar count is :" + newCount);
           }
           var strNewCount = newCount.toString();
           return _setEntry(context, Address, strNewCount);
         });
-
-
       } else {
         throw new InvalidTransaction('Action must be bake or eat ');
       }
@@ -133,7 +100,6 @@ class CookieJarHandler extends TransactionHandler {
     catch (err) {
       _toInternalError(err);
     }
-
   }
 }
 
