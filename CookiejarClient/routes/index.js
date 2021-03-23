@@ -28,7 +28,7 @@ router.get('/home', function (req, res) {
 router.post('/', function (req, res) {
   var Key = req.body.privateKey;
   var cookiejar_client = new CookiejarClient(Key);  //?
-  res.send({ done: 1, privatekey: Key, message: "your privatekey is " + Key });
+  res.send({ done: 1, privatekey: Key, message: "Your private key is " + Key });
 });
 
 
