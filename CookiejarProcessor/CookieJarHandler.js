@@ -39,7 +39,7 @@ class CookieJarHandler extends TransactionHandler {
   apply(transactionProcessRequest, context) {
 
     try {
-      console.log('trasactioProcessRequest=', transactionProcessRequest);
+      console.log('trasactionProcessRequest=', transactionProcessRequest);
       const payload = decoder.decode(transactionProcessRequest.payload);
       let payloadData = payload.toString().split(',');
       var header = transactionProcessRequest.header;
